@@ -71,7 +71,6 @@ Commands are case-insensitive, but the command arguments should be handled as no
 | `UPPER hello`   | `HELLO`             |
 | `LOWER HELLO`   | `hello`             |
 | `REVERSE hello` | `olleh`             |
-| `TIME`          | current server time |
 | `QUIT`          | closes connection   |
 | unknown command | error message       |
 
