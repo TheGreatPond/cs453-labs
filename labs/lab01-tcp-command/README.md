@@ -178,9 +178,13 @@ npm run test:watch
 Answer the following questions in your submission:
 
 1. What is the difference between the client and the server?
+a. Client requests a service. Server provides service
 2. Why does the server need to keep running after handling one request?
+a. A server may need to keep running after handling a request since a client could send another request to the server and will expect a response. 
 3. What happens if two clients connect at the same time?
+a. If another client is connected at the same time, the connection is handled over another socket. For example in my terminal connecting to the server on my localhost with clients from my localhost, the first connection is reaching out over port 50280 and the second connection is reaching out over port 50290
 4. How is this different from HTTP?
+a. this (a TCP EchoServer) is lower level than http and requires us to read directly from sockets
 
 ## Submission
 
