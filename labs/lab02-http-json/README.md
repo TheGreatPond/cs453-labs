@@ -110,6 +110,9 @@ Your server must support at least the following operations:
 | `subtract` | Subtract `b` from `a` |
 | `multiply` | Multiply `a` and `b`  |
 | `divide`   | Divide `a` by `b`     |
+| `modulo`   | Find the remainder of |
+|            | dividing`a` by `b`    |
+
 
 The server should return an error response for unsupported operations.
 
@@ -202,6 +205,14 @@ curl -X POST http://localhost:3000/echo \
   -d '{"message":"hello"}'
 ```
 
+Example `POST /uppercase` request:
+
+```bash
+curl -X POST http://localhost:3000/uppercase \
+  -H "Content-Type: application/json" \
+  -d '{"message":"hello"}'
+```
+
 Example `POST /calculate` request:
 
 ```bash
@@ -269,10 +280,15 @@ npm run test:watch
 Answer the following questions in your submission:
 
 1. What is the difference between a TCP message and an HTTP request?
+a. TCP sends and recieves bytes over a socket. HTTP defines request and response messages that would be sent over a tcp connection
 2. What does the `Content-Type: application/json` header tell the server?
+a. Content-Type tells the server what it can expect to recieve in the body of the message. In this case JSON
 3. Why should a server return different HTTP status codes for different situations?
+a. The server needs to give the client an idea of if their request was successful and if not, why it wasn't. For exampleif a route doesn't exist, the user should be informed of that so that they can adjust their URL
 4. What happens if the client sends invalid JSON?
+a. In this lab, invalid JSON is met with an error code explaining that Invalid JSON was input to from the client request
 5. How is this lab different from Lab 1?
+a. This lab sends request over http which is built on top of TCP. On top of that, we are using json to move messages back and forth rather than just shooting the message itself
 
 ## Graduate Students
 
@@ -281,9 +297,13 @@ Graduate students should complete one additional feature.
 Choose one of the following:
 
 1. Add a new route, such as `GET /time` or `POST /uppercase`.
+a. I have implemented the /uppercase route and added a test for it in the server.test.js file
 2. Add one additional calculation operation and document it.
+a. I've added the modulo operation, added it as an operation in the read me and added a test
 3. Improve the request counter so it tracks counts by route.
+a. this has been implemented and also includes a tracker for unknown routes
 4. Add additional automated tests for error handling.
+a. I've added an argument counter to the calculate function so that if more or less than 3 keys are presented in the json it will show an error explaining that the only keys allowed are operator, a, and b
 
 Document your graduate extension in your submission.
 

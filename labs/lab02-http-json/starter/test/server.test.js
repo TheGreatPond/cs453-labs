@@ -107,6 +107,18 @@ describe("Lab 2 HTTP JSON server", () => {
         expect(result.body).toHaveProperty("error");
     });
 
+    test("POST /uppercase returns the submitted JSON body", async () => {
+        const result = await postJson("/uppercase", {
+            message: "hello"
+        });
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual({
+            message: "HELLO"
+        });
+    });
+
+
     test("POST /calculate can add two numbers", async () => {
         const result = await postJson("/calculate", {
             operation: "add",
@@ -159,6 +171,19 @@ describe("Lab 2 HTTP JSON server", () => {
         });
     });
 
+    test("POST /calculate can use the modulo operation", async () => {
+        const result = await postJson("/calculate", {
+            operation: "modulo",
+            a: 26,
+            b: 5
+        });
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual({
+            result: 1
+        });
+    });
+
     test("POST /calculate rejects division by zero", async () => {
         const result = await postJson("/calculate", {
             operation: "divide",
@@ -207,9 +232,9 @@ describe("Lab 2 HTTP JSON server", () => {
         const result = await getJson("/requests");
 
         expect(result.status).toBe(200);
-        expect(result.body).toHaveProperty("count");
-        expect(typeof result.body.count).toBe("number");
-        expect(result.body.count).toBeGreaterThanOrEqual(2);
+        expect(result.body).toHaveProperty("totalRequests");
+        expect(typeof result.body.totalRequests).toBe("number");
+        expect(result.body.totalRequests).toBeGreaterThanOrEqual(2);
     });
 });
 
