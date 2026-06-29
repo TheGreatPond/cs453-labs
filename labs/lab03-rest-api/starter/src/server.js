@@ -32,8 +32,9 @@ export function createApp() {
   // DONE: Create a new item.
   app.post("/items", (req, res) => {
     items.push({"id":nextId, "name":req.body.name, "quantity":req.body.quantity});
+    let index = items.findIndex(test => test.id == nextId);
     nextId++;
-    res.status(201).json({ status: "ok" });
+    res.status(201).json(JSON.stringify(items[index]));
   });
 
   // DONE: Update an existing item.
@@ -52,8 +53,11 @@ export function createApp() {
     let index = items.findIndex(test => test.id == req.params.id);
     if (index !== -1) {
       items.splice(index, 1);
+      res.status(204).json({ status: "ok" });
     }
-    res.status(204).json({ status: "ok" });
+    else{
+      res.status(404).json({ error: "Resource requested not found to delete" });
+    }
   });
 
   app.use((req, res) => {

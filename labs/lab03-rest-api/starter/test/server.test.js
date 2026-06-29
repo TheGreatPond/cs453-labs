@@ -20,28 +20,61 @@ describe("Lab 3 starter", () => {
         .get("/items")
         .expect(200);
 
-    expect(response.body).toEqual({ status: "ok" });
+    expect(response.body).toEqual([
+      {
+        "id": 1,
+        "name": "keyboard",
+        "quantity": 10
+      },
+      {
+        "id": 2,
+        "name": "mouse",
+        "quantity": 5
+      }
+    ]);
   });
 
-  test("GET /health returns status ok", async () => {
+  test("POST /items returns item created", async () => {
     const app = createApp();
 
     const response = await request(app)
-        .get("/items:id")
-        .expect(200);
+      .post('/items')
+      .send({ name: "monitor", quantity: 12 }); // Automatically stringifies
 
-    expect(response.body).toEqual({ status: "ok" });
+    expect(response.status).toBe(201);
+    expect(response.body).toEqual("{\"id\":3,\"name\":\"monitor\",\"quantity\":12}"); // Compares objects directly
   });
 
-  test("GET /health returns status ok", async () => {
+  test("PUT /items/:id returns item updated", async () => {
     const app = createApp();
 
     const response = await request(app)
-        .get("/health")
-        .expect(200);
+      .put('/items/1')
+      .send({ name: "monitor", quantity: 12 }); // Automatically stringifies
 
-    expect(response.body).toEqual({ status: "ok" });
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual("{\"id\":\"1\",\"name\":\"monitor\",\"quantity\":12}"); // Compares objects directly
   });
 
+
+  test("GET /item/:id returns status ok", async () => {
+    const app = createApp();
+
+    const response = await request(app)
+        .get("/items/1")
+        .expect(200);
+
+    expect(response.body).toEqual("{\"id\":1,\"name\":\"keyboard\",\"quantity\":10}");
+  });
+
+  test("DELETE /item/:id returns code 204", async () => {
+    const app = createApp();
+
+    const response = await request(app)
+        .delete('/items/1')
+        .expect(204);
+
+    expect(response.body).toEqual({});
+  });
 
 });
