@@ -40,11 +40,11 @@ export function createApp() {
   app.put("/items/:id", (req, res) => {
     let index = items.findIndex(test => test.id == req.params.id);
     if (index !== -1) {
-      items[index].id = req.body.id;
+      items[index].id = req.params.id;
       items[index].name = req.body.name;
       items[index].quantity = req.body.quantity;
     }
-    res.json({ status: "ok" });
+    res.json(JSON.stringify(items[index]));
   });
 
   // DONE: Delete an existing item.
