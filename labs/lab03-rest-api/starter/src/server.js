@@ -17,29 +17,42 @@ export function createApp() {
     res.json({ status: "ok" });
   });
 
-  // TODO: Return all items.
+  // DONE: Return all items.
   app.get("/items", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    res.json(items);
   });
 
-  // TODO: Return one item by ID.
+  // DONE: Return one item by ID.
   app.get("/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    const single_item = items.find(test => test.id == req.params.id);
+    res.json(JSON.stringify(single_item));
   });
 
-  // TODO: Create a new item.
+  // DONE: Create a new item.
   app.post("/items", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    items.push({"id":nextId, "name":req.body.name, "quantity":req.body.quantity});
+    nextId++;
+    res.status(201).json({ status: "ok" });
   });
 
-  // TODO: Update an existing item.
+  // DONE: Update an existing item.
   app.put("/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    let index = items.findIndex(test => test.id == req.params.id);
+    if (index !== -1) {
+      items[index].id = req.body.id;
+      items[index].name = req.body.name;
+      items[index].quantity = req.body.quantity;
+    }
+    res.json({ status: "ok" });
   });
 
-  // TODO: Delete an existing item.
+  // DONE: Delete an existing item.
   app.delete("/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+    let index = items.findIndex(test => test.id == req.params.id);
+    if (index !== -1) {
+      items.splice(index, 1);
+    }
+    res.json({ status: "ok" });
   });
 
   app.use((req, res) => {

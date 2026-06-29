@@ -12,4 +12,36 @@ describe("Lab 3 starter", () => {
 
     expect(response.body).toEqual({ status: "ok" });
   });
+
+  test("GET /items returns all items", async () => {
+    const app = createApp();
+
+    const response = await request(app)
+        .get("/items")
+        .expect(200);
+
+    expect(response.body).toEqual({ status: "ok" });
+  });
+
+  test("GET /health returns status ok", async () => {
+    const app = createApp();
+
+    const response = await request(app)
+        .get("/items:id")
+        .expect(200);
+
+    expect(response.body).toEqual({ status: "ok" });
+  });
+
+  test("GET /health returns status ok", async () => {
+    const app = createApp();
+
+    const response = await request(app)
+        .get("/health")
+        .expect(200);
+
+    expect(response.body).toEqual({ status: "ok" });
+  });
+
+
 });

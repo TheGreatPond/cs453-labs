@@ -38,19 +38,19 @@ TODO
 
 ### 2. What is the purpose of a route parameter such as `/items/:id`?
 
-TODO
+The route parameter informs the request of the location of the resource it is accessing
 
 ### 3. Why should `POST`, `PUT`, and `DELETE` use different HTTP methods?
 
-TODO
+They need 3 different methods since they are trying to accomplish 3 different things. Post creates new resources and is not idempotent, put replaces a resource rather than deleting it, and delete does what the name suggest and deletes whatver resource is specified 
 
 ### 4. What is the difference between a `400` error and a `404` error?
 
-TODO
+400 is client error or "request body is invalid" and 404 is that a requested item is not found
 
 ### 5. How does the OpenAPI file relate to your Express server code?
 
-TODO
+The OpenAPI doc guides the client application on what request and parameters are allowed when making request to the REST API Server
 
 ## Graduate Extension
 
