@@ -1,10 +1,11 @@
 import express from "express";
+import cors from "cors";
 
 export function createApp() {
   const app = express();
 
   app.use(express.json());
-
+  app.use(cors());
   // Starter data. This data is stored in memory and will reset when the
   // server restarts.
   let nextId = 3;
@@ -52,7 +53,7 @@ export function createApp() {
     if (index !== -1) {
       items.splice(index, 1);
     }
-    res.json({ status: "ok" });
+    res.status(204).json({ status: "ok" });
   });
 
   app.use((req, res) => {

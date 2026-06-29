@@ -8,10 +8,15 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "supertest": "^7.0.0",
     "vitest": "^4.1.7"
+  },
+  "allowScripts": {
+    "@scarf/scarf@1.4.0": true
   }
 }
