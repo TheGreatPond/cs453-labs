@@ -54,4 +54,4 @@ The OpenAPI doc guides the client application on what request and parameters are
 
 ## Graduate Extension
 
-TODO: Graduate students should describe their extension here.
+The graduate extension for this project was to add automated tests for invalid input. To accomplish this, for each request that contains a request body, i am checking both the name of the arguments and count of arguments. This means that users should only be able to have the proper arguments and no unneccessary arguments in their json. If the json is malformed, a seperate error is returned from that of a request for a resource that could not be found.

@@ -25,27 +25,49 @@ export function createApp() {
 
   // DONE: Return one item by ID.
   app.get("/items/:id", (req, res) => {
-    const single_item = items.find(test => test.id == req.params.id);
-    res.json(JSON.stringify(single_item));
+
+    let index = items.findIndex(test => test.id == req.params.id);
+    if (index !== -1) {
+      const single_item = items.find(test => test.id == req.params.id);
+      res.json(JSON.stringify(single_item));
+    } else {
+      res.status(404).json({ error: "Resource requested not found to retrieve" });
+    }
+
   });
 
   // DONE: Create a new item.
   app.post("/items", (req, res) => {
-    items.push({"id":nextId, "name":req.body.name, "quantity":req.body.quantity});
-    let index = items.findIndex(test => test.id == nextId);
-    nextId++;
-    res.status(201).json(JSON.stringify(items[index]));
+  // TODO: Validate input as name and quantity
+    if (req.body.hasOwnProperty('quantity') && req.body.hasOwnProperty('name') && Object.keys(req.body).length === 2){
+      let index = items.findIndex(test => test.id == nextId);
+      items.push({"id":nextId, "name":req.body.name, "quantity":req.body.quantity});
+      nextId++;
+      res.status(201).json(JSON.stringify(items[index]));
+    } else {
+      res.status(400).json({ error: "Malformed json, please try again with only keys name and quantity" });
+    }
+
+
+
   });
 
   // DONE: Update an existing item.
   app.put("/items/:id", (req, res) => {
+    // TODO: Validate input as id, name and quantity
     let index = items.findIndex(test => test.id == req.params.id);
     if (index !== -1) {
-      items[index].id = req.params.id;
-      items[index].name = req.body.name;
-      items[index].quantity = req.body.quantity;
+      if (req.body.hasOwnProperty('quantity') && req.body.hasOwnProperty('name') && Object.keys(req.body).length === 2){
+          items[index].id = req.params.id;
+          items[index].name = req.body.name;
+          items[index].quantity = req.body.quantity;
+          res.json(JSON.stringify(items[index]));
+        } else {
+          res.status(400).json({ error: "Malformed json, please try again with only keys name and quantity" });
+        }
+      } else {
+      res.status(404).json({ error: "Resource requested not found to update" });
     }
-    res.json(JSON.stringify(items[index]));
   });
 
   // DONE: Delete an existing item.
@@ -56,6 +78,7 @@ export function createApp() {
       res.status(204).json({ status: "ok" });
     }
     else{
+      console.log({ error: "Resource requested not found to delete" });
       res.status(404).json({ error: "Resource requested not found to delete" });
     }
   });
