@@ -1,8 +1,12 @@
 const API_BASE_URL = "http://localhost:3000";
 
 const loadButton = document.querySelector("#load-items");
+const deleteButton = document.querySelector("#delete-item");
+const searchButton = document.querySelector("#search-by-id");
+const restockButton = document.querySelector("#restock");
 const itemList = document.querySelector("#items");
-const form = document.querySelector("#add-item-form");
+const form = document.querySelector("#post-put-patch-item-form");
+const itemIdInput = document.querySelector("#item-id");
 const itemNameInput = document.querySelector("#item-name");
 const itemQuantityInput = document.querySelector("#item-quantity");
 const statusBox = document.querySelector("#status");
@@ -39,9 +43,56 @@ async function loadItems() {
   }
 }
 
-async function addItem(name, quantity) {
-  setStatus("Adding item...");
+async function searchItems() {
+  setStatus("Searching for item by ID...");
+  const id = itemIdInput.value.trim();
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`);
 
+    if (!response.ok) {
+      throw new Error(`GET /api/items failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    renderItems(data.items);
+    setStatus("Items loaded.");
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function restockItem() {
+  setStatus("Searching for item by ID...");
+  const id = itemIdInput.value.trim();
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}/restock`);
+
+    if (!response.ok) {
+      throw new Error(`GET /api/items/${id}/restock failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    renderItems(data.items);
+    setStatus("Items loaded.");
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function  deleteItem() {
+  setStatus("Deleting item...");
+  const id = itemIdInput.value.trim();
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+      method: "DELETE"});
+    setStatus("Items deleted.");
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function postItem(name, quantity) {
+  setStatus("Adding item...");
   try {
     const response = await fetch(`${API_BASE_URL}/api/items`, {
       method: "POST",
@@ -58,13 +109,86 @@ async function addItem(name, quantity) {
     }
 
     setStatus(`Added item: ${data.item.name}`);
-    await loadItems();
   } catch (error) {
     setStatus(error.message);
   }
 }
 
+async function putItem(name, quantity) {
+  setStatus("Replacing item...");
+  const id = itemIdInput.value.trim();
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, quantity })
+    });
+
+    const data = await response;
+
+    if (!response.ok) {
+      throw new Error(data.message ?? `PUT /api/items/${id} failed with status ${response.status}`);
+    }
+
+    setStatus(`Replaced item with id: ${id}`);
+  } catch (error) {
+    setStatus(error.message);
+  }
+}
+
+async function patchItem(name, quantity) {
+  setStatus("Replacing item...");
+  const id = itemIdInput.value.trim();
+  if( name != ""){
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name })
+      });
+
+    const data = await response;
+
+    if (!response.ok) {
+      throw new Error(data.message ?? `PUT /api/items/${id} failed with status ${response.status}`);
+    }
+
+    setStatus(`updated name of item with id: ${id}`);
+    } catch (error) {
+    setStatus(error.message);
+    }
+  } else if (quantity != "") {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/items/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ quantity })
+      });
+
+    const data = await response;
+
+    if (!response.ok) {
+      throw new Error(data.message ?? `PUT /api/items/${id} failed with status ${response.status}`);
+    }
+
+    setStatus(`updated quantity of item with id: ${id}`);
+    } catch (error) {
+    setStatus(error.message);
+    }
+  }
+}
+
+
 loadButton.addEventListener("click", loadItems);
+deleteButton.addEventListener("click", deleteItem);
+searchButton.addEventListener("click", searchItems);
+restockButton.addEventListener("click", restockItem);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -72,12 +196,30 @@ form.addEventListener("submit", async (event) => {
   const name = itemNameInput.value.trim();
   const quantity = Number(itemQuantityInput.value);
 
-  if (!name || !Number.isInteger(quantity) || quantity < 0) {
-    setStatus("Enter a name and a non-negative integer quantity.");
+  if (!Number.isInteger(quantity) || quantity < 0) {
+    setStatus("Enter a non-negative integer quantity.");
+    console.log("test");
     return;
   }
 
+  if (itemIdInput.value == "" && itemNameInput.value != "" && itemQuantityInput.value != "-1" && Number.isInteger(quantity) && quantity >= 0) {
+    console.log("using post function");
+    postItem(name, quantity);
+  } else if (itemNameInput.value != "" && itemQuantityInput.value != "") {
+    console.log("using put function");
+    putItem(name, quantity);
+  }else if ((Number.isInteger(itemIdInput.value) || itemIdInput.value >= 0) && ((itemNameInput.value === "" && itemQuantityInput.value !== "") || (itemNameInput.value !== "" && itemQuantityInput.value === ""))) {
+    console.log("using patch function");
+    patchItem(name, quantity);
+  }
+
+
+  console.log(`ID: ${itemIdInput.value}`);
+  console.log(`Name: ${itemNameInput.value}`);
+  console.log(`Quantity: ${itemQuantityInput.value}`);
+
+
+  itemIdInput.value == "";
   itemNameInput.value = "";
-  itemQuantityInput.value = "0";
-  await addItem(name, quantity);
+  itemQuantityInput.value = "";
 });

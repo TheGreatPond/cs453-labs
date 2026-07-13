@@ -1,0 +1,239 @@
+openapi: 3.0.3
+info:
+  title: Lab 3 Item API
+  version: 1.0.0
+  description: First Swagger doc, describing basic CRUD operations on a list of items
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+  /health:
+    get:
+      summary: "Health check test"
+      responses:
+        "200":
+          description: "Server is running"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  status:
+                    type: "string"
+                    example: "ok"
+  # DONE: Document GET /items.
+  /api/items:
+    get:
+      summary: Get list of items
+      responses:
+        "200":
+          description: List of items returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: [{"id":1,"name":"keyboard","quantity":10},{"id":2,"name":"mouse","quantity":5}]
+  # DONE: Document POST /items.
+    post:
+      summary: "Adds new item to list"
+      requestBody:
+        description: "needs a name of item and quantity"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+            example:
+              name: monitor
+              quantity: 12
+      responses:
+        "201":
+          description: "Null response"
+        "400":
+          description: "Invalid request, item not created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInvalidBody"
+
+  /api/items/{id}:
+  # DONE: Document GET /items/{id}.
+    get:
+      summary: Get item from list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the item to get
+      responses:
+        "200":
+          description: Single item returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: "Resource requested not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorNotFound"
+
+  # DONE: Document PUT /items/{id}.
+    put:
+      summary: Update one item in list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the item to update
+      requestBody:
+        description: "needs a name of item and quantity"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+            example:
+              name: monitor
+              quantity: 12
+      responses:
+        "200":
+          description: Single item returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: "Resource requested not found and could not be altered"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorNotFound"
+        "400":
+          description: "Invalid request, item not updated"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInvalidBody"
+
+  # DONE: Document PUT /items/{id}.
+    patch:
+      summary: Update part of one item in list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the item to update
+      requestBody:
+        description: "needs a combination of any of the following: title, course, and completed"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ItemInput"
+
+      responses:
+        "200":
+          description: Single item returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: "Resource requested not found and could not be altered"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorNotFound"
+        "400":
+          description: "Invalid request, item not updated"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorInvalidBody"
+
+  # DONE: Document DELETE /items/{id}.
+    delete:
+      summary: Delete item from list
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the item to delete
+      responses:
+        "204":
+          description: "Null response"
+        "404":
+          description: "Resource requested not found and therefore not deleted"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorNotFound"
+
+
+  #
+  # Remember:
+  # - Express routes use :id, such as /items/:id.
+  # - OpenAPI paths use {id}, such as /items/{id}.
+  #
+  # You may define schemas under components/schemas if you want to avoid
+  # repeating the same object structure many times.
+
+components:
+  schemas:
+  # DONE: Define an Item schema with id, name, and quantity.
+    Item:
+      type: object
+      required:
+        - id
+        - name
+        - quantity
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+          example: "monitor"
+        quantity:
+          type: integer
+          minimum: 0
+  # DONE: Define an ItemInput schema with name and quantity.
+    ItemInput:
+      type: object
+      required:
+        - name
+        - quantity
+      properties:
+        name:
+          type: string
+          example: "monitor"
+        quantity:
+          type: integer
+          minimum: 0
+  # DONE: Define an ErrorResponse schema with an error message.
+    ErrorNotFound:
+      type: object
+      properties:
+        Error:
+          type: string
+          example: "The resource you were looking for could not be found, please correct your path and try again"
+    ErrorInvalidBody:
+      type: object
+      properties:
+        Error:
+          type: string
+          example: "Invalid request body, please adjust your request and try again."

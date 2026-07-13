@@ -20,10 +20,20 @@ export function createApp() {
   app.use(express.json());
 
   app.use(cors({
+    /* 
     origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173"
-    ]
+    //   "http://localhost:5173",
+    //   "http://127.0.0.1:5173",
+    //   "http://192.168.1.*:5173",
+    //   "http://172.18.0.1:5173",
+    //   "http://localhost:3000",
+    //   "http://127.0.0.1:3000"
+     ]
+
+     */
+
+    origin: true // i know this is bad practice but i am using this with my swagger doc since my swagger plugin within vscode hates cors
+
   }));
 
   app.get("/health", async (req, res) => {
@@ -90,24 +100,189 @@ export function createApp() {
     }
   });
 
-  // TODO: Return one item by ID.
-  app.get("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // DONE: Return one item by ID.
+  app.get("/api/items/:id", async (req, res) => {
+    const id = req.params.id;
+    try {
+      const result = await pool.query(`
+        SELECT id, name, quantity
+        FROM items
+        WHERE ID = $1
+      `,
+      [id]);
+      if (result.rows.length === 0){
+        res.status(404).json({ error: "Resource requested not found" });
+      } else{
+        res.json({ items: result.rows });
+      }
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load items."
+      });
+    }
   });
 
-  // TODO: Replace one item by ID.
-  app.put("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // DONE: Replace one item by ID.
+  app.put("/api/items/:id", async (req, res) => {
+    const name = req.body?.name?.trim();
+    const quantity = Number(req.body?.quantity);
+    const id = req.params.id;
+
+    if (!name || !Number.isInteger(quantity) || quantity < 0) {
+      return res.status(400).json({
+        error: "Bad Request",
+        message: "A name and non-negative integer quantity are required."
+      });
+    }
+
+    try {
+      const result = await pool.query(`
+        SELECT id, name, quantity
+        FROM items
+        WHERE ID = $1
+      `,
+      [id]);
+      if (result.rows.length === 0){
+        res.status(404).json({ error: "Resource requested not found" });
+      } else{
+          try {
+            const result =  await pool.query(
+              `
+              UPDATE items
+              SET name = $1, quantity = $2
+              WHERE id = $3
+              `,
+              [name, quantity, id]
+            );
+
+            res.status(201).json({ item: result.rows[0] });
+          } catch (error) {
+            console.error("Failed to add item:", error);
+            res.status(500).json({
+              error: "Internal Server Error",
+              message: "Failed to add item."
+            });
+          }
+            }
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load items."
+      });
+    }
+
+
   });
 
-  // TODO: Partially update one item by ID.
-  app.patch("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+
+  // DONE: Partially update one item by ID.
+  app.patch("/api/items/:id", async (req, res) => {
+    const id = req.params.id;
+
+    try {
+      const result = await pool.query(`
+        SELECT id, name, quantity
+        FROM items
+        WHERE ID = $1
+      `,
+      [id]);
+      if (result.rows.length === 0){
+        res.status(404).json({ error: "Resource requested not found" });
+      } else{
+              if ((req.body.hasOwnProperty('quantity') || req.body.hasOwnProperty('name')) && Object.keys(req.body).length <= 2){
+        if (req.body.hasOwnProperty('quantity')){
+          const quantity = req.body.quantity;
+          const result =  await pool.query(
+            `
+            UPDATE items
+            SET quantity = $1
+            WHERE id = $2
+            `,
+            [quantity, id]
+          );
+        }
+        if (req.body.hasOwnProperty('name')){
+          const name = req.body.name;
+          const result =  await pool.query(
+            `
+            UPDATE items
+            SET name = $1
+            WHERE id = $2
+            `,
+            [name, id]
+          );
+        }
+
+        try {
+          const result = await pool.query(`
+            SELECT id, name, quantity
+            FROM items
+            WHERE ID = $1
+          `,
+          [id]);
+
+          res.json({ items: result.rows });
+        } catch (error) {
+          console.error("Failed to load items:", error);
+          res.status(500).json({
+            error: "Internal Server Error",
+            message: "Failed to load items."
+          });
+        }
+      } else {
+        res.status(400).json({ error: "Malformed json, please try again with only name and quantity" });
+      } 
+      }
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load items."
+      });
+    }
   });
 
-  // TODO: Delete one item by ID.
-  app.delete("/api/items/:id", (req, res) => {
-    res.status(501).json({ error: "Not implemented yet" });
+  // DONE: Delete one item by ID.
+  app.delete("/api/items/:id", async (req, res) => {
+    const id = req.params.id;
+
+    try {
+      const result = await pool.query(`
+        SELECT id, name, quantity
+        FROM items
+        WHERE ID = $1
+      `,
+      [id]);
+      if (result.rows.length === 0){
+        res.status(404).json({ error: "Resource requested not found" });
+      } else{
+          try {
+            const result = await pool.query(`
+              DELETE FROM items
+              WHERE ID = $1
+            `,
+            [id]);
+            res.status(204).json({ result: "Item successfully deleted" });
+          } catch (error) {
+            console.error("Failed to load items:", error);
+            res.status(500).json({
+              error: "Internal Server Error",
+              message: "Failed to load items."
+            });
+          }
+      }
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load items."
+      });
+    }
+
+
   });
 
   app.use((req, res) => {
