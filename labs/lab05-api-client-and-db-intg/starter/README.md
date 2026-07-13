@@ -47,20 +47,20 @@ and connect it to the database.
 
 ### 1. What changed when the API moved from in-memory data to Postgres?
 
-TODO
+The data gained persistence meaning it would remain even if the api server was stopped and restarted
 
 ### 2. When should you use `PUT` instead of `PATCH`?
 
-TODO
+When only updating a portion of a record
 
 ### 3. What kinds of validation belong in the API even if the browser client also validates input?
 
-TODO
+Input validation still belongs in the API since the webpage could be modified to allow unexpected inputs to be sent to the api
 
 ### 4. How does the browser client help you test the API differently than `curl` alone?
 
-TODO
+The browser client also might implement security policies such as cors that are not enabled for curl
 
 ### 5. If you added an extension, what did you add and why?
 
-TODO
+My extension adds a restock quantity that can be viewed as the amount of that item that would arrive in a standard restocking palette. In a store, this restocking call could be used whenever a palette arrives to restock an item within the inventory spreadsheet. Different items will have different sized restock quantities since different items would have different quantities of items on a palette. The starting DB will need to have the restock_quantities column added in order to cooperate with the new code. I've also made a swagger doc for this that should be useful in testing outside of the client webpage.

@@ -53,7 +53,7 @@ export function createApp() {
   app.get("/api/items", async (req, res) => {
     try {
       const result = await pool.query(`
-        SELECT id, name, quantity
+        SELECT id, name, quantity, restock_quantity
         FROM items
         ORDER BY id ASC
       `);
@@ -72,6 +72,7 @@ export function createApp() {
   app.post("/api/items", async (req, res) => {
     const name = req.body?.name?.trim();
     const quantity = Number(req.body?.quantity);
+    const restock_quantity = req.body?.restock_quantity
 
     if (!name || !Number.isInteger(quantity) || quantity < 0) {
       return res.status(400).json({
@@ -83,11 +84,11 @@ export function createApp() {
     try {
       const result = await pool.query(
         `
-          INSERT INTO items (name, quantity)
-          VALUES ($1, $2)
-          RETURNING id, name, quantity
+          INSERT INTO items (name, quantity, restock_quantity)
+          VALUES ($1, $2, $3)
+          RETURNING id, name, quantity, restock_quantity
         `,
-        [name, quantity]
+        [name, quantity, restock_quantity]
       );
 
       res.status(201).json({ item: result.rows[0] });
@@ -105,7 +106,7 @@ export function createApp() {
     const id = req.params.id;
     try {
       const result = await pool.query(`
-        SELECT id, name, quantity
+        SELECT id, name, quantity, restock_quantity
         FROM items
         WHERE ID = $1
       `,
@@ -124,10 +125,49 @@ export function createApp() {
     }
   });
 
+  app.get("/api/items/:id/restock", async (req, res) => {
+    const id = req.params.id;
+    try {
+      const temp_result = await pool.query(`
+        SELECT quantity, restock_quantity
+        FROM items
+        WHERE ID = $1
+      `,
+      [id]);
+      if (temp_result.rows.length === 0){
+        res.status(404).json({ error: "Resource requested not found" });
+      } else{
+        const new_quantity = temp_result.rows[0].restock_quantity + temp_result.rows[0].quantity;
+        const middle_result =  await pool.query(
+          `
+          UPDATE items
+          SET quantity = $1
+          WHERE id = $2
+          `,
+          [new_quantity, id]
+        );
+        const result = await pool.query(`
+        SELECT id, name, quantity, restock_quantity
+        FROM items
+        WHERE ID = $1
+        `,
+        [id])
+        res.json({ items: result.rows });
+      }
+    } catch (error) {
+      console.error("Failed to load items:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to load items."
+      });
+    }
+  });
+
   // DONE: Replace one item by ID.
   app.put("/api/items/:id", async (req, res) => {
     const name = req.body?.name?.trim();
     const quantity = Number(req.body?.quantity);
+    const restock_quantity = Number(req.body?.restock_quantity);
     const id = req.params.id;
 
     if (!name || !Number.isInteger(quantity) || quantity < 0) {
@@ -139,7 +179,7 @@ export function createApp() {
 
     try {
       const result = await pool.query(`
-        SELECT id, name, quantity
+        SELECT id, name, quantity, restock_quantity
         FROM items
         WHERE ID = $1
       `,
@@ -151,10 +191,10 @@ export function createApp() {
             const result =  await pool.query(
               `
               UPDATE items
-              SET name = $1, quantity = $2
-              WHERE id = $3
+              SET name = $1, quantity = $2, restock_quantity = $3
+              WHERE id = $4
               `,
-              [name, quantity, id]
+              [name, quantity, restock_quantity,  id]
             );
 
             res.status(201).json({ item: result.rows[0] });
@@ -181,10 +221,9 @@ export function createApp() {
   // DONE: Partially update one item by ID.
   app.patch("/api/items/:id", async (req, res) => {
     const id = req.params.id;
-
     try {
       const result = await pool.query(`
-        SELECT id, name, quantity
+        SELECT id, name, quantity, restock_quantity
         FROM items
         WHERE ID = $1
       `,
@@ -192,7 +231,7 @@ export function createApp() {
       if (result.rows.length === 0){
         res.status(404).json({ error: "Resource requested not found" });
       } else{
-              if ((req.body.hasOwnProperty('quantity') || req.body.hasOwnProperty('name')) && Object.keys(req.body).length <= 2){
+              if ((req.body.hasOwnProperty('quantity') || req.body.hasOwnProperty('name')) || req.body.hasOwnProperty('restock_quantity') && Object.keys(req.body).length <= 3){
         if (req.body.hasOwnProperty('quantity')){
           const quantity = req.body.quantity;
           const result =  await pool.query(
@@ -215,10 +254,21 @@ export function createApp() {
             [name, id]
           );
         }
+        if (req.body.hasOwnProperty('restock_quantity')){
+          const restock_quantity = req.body?.restock_quantity
+          const result =  await pool.query(
+            `
+            UPDATE items
+            SET restock_quantity = $1
+            WHERE id = $2
+            `,
+            [restock_quantity, id]
+          );
+        }
 
         try {
           const result = await pool.query(`
-            SELECT id, name, quantity
+            SELECT id, name, quantity, restock_quantity
             FROM items
             WHERE ID = $1
           `,
@@ -251,7 +301,7 @@ export function createApp() {
 
     try {
       const result = await pool.query(`
-        SELECT id, name, quantity
+        SELECT id, name, quantity, restock_quantity
         FROM items
         WHERE ID = $1
       `,

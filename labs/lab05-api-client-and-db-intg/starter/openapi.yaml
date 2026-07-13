@@ -36,7 +36,7 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: [{"id":1,"name":"keyboard","quantity":10},{"id":2,"name":"mouse","quantity":5}]
+                    example: [{"id":1,"name":"keyboard","quantity":10,"restock_quantity":15},{"id":2,"name":"mouse","quantity":5,"restock_quantity":10}]
   # DONE: Document POST /items.
     post:
       summary: "Adds new item to list"
@@ -50,6 +50,7 @@ paths:
             example:
               name: monitor
               quantity: 12
+              restock_quantity: 15
       responses:
         "201":
           description: "Null response"
@@ -105,6 +106,7 @@ paths:
             example:
               name: monitor
               quantity: 12
+              restock_quantity: 15
       responses:
         "200":
           description: Single item returned
@@ -183,6 +185,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorNotFound"
 
+  /api/items/{id}/restock:
+  # DONE: Document GET /items/{id}.
+    get:
+      summary: Restock item accordingto restock amount in table
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the item to get
+      responses:
+        "200":
+          description: Single item returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Item"
+        "404":
+          description: "Resource requested not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorNotFound"
+
 
   #
   # Remember:
@@ -201,6 +228,7 @@ components:
         - id
         - name
         - quantity
+        - restock_quantity
       properties:
         id:
           type: integer
@@ -211,6 +239,9 @@ components:
         quantity:
           type: integer
           minimum: 0
+        restock_quantity:
+          type: integer
+          minimum: 1
   # DONE: Define an ItemInput schema with name and quantity.
     ItemInput:
       type: object
@@ -224,6 +255,9 @@ components:
         quantity:
           type: integer
           minimum: 0
+        restock_quantity:
+          type: integer
+          minimum: 1
   # DONE: Define an ErrorResponse schema with an error message.
     ErrorNotFound:
       type: object

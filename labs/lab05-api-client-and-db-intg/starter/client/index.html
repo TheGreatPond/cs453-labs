@@ -28,7 +28,12 @@
 
           <label>
             Quantity
-            <input id="item-quantity" name="quantity" type="number" min="-1">
+            <input id="item-quantity" name="quantity" type="number" min="0">
+          </label>
+
+          <label>
+            Restock Quantity
+            <input id="item-restock_quantity" name="restock_quantity" type="number" min="0">
           </label>
 
           <p>
@@ -66,7 +71,7 @@
           </p>
 
           <div class="actions">
-            <button id="search-by-id" type="button">Search By ID</button>
+            <button id="restockButton" type="button">Restock</button>
           </div>
 
         </form>
