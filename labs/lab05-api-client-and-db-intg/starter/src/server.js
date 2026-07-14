@@ -20,19 +20,19 @@ export function createApp() {
   app.use(express.json());
 
   app.use(cors({
-    /* 
+    
     origin: [
-    //   "http://localhost:5173",
-    //   "http://127.0.0.1:5173",
-    //   "http://192.168.1.*:5173",
-    //   "http://172.18.0.1:5173",
-    //   "http://localhost:3000",
-    //   "http://127.0.0.1:3000"
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://192.168.1.*:5173",
+      "http://172.18.0.1:5173",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000"
      ]
 
-     */
+     
 
-    origin: true // i know this is bad practice but i am using this with my swagger doc since my swagger plugin within vscode hates cors
+    //origin: true // i know this is bad practice but i am using this with my swagger doc since my swagger plugin within vscode hates cors
 
   }));
 
