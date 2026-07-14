@@ -347,7 +347,9 @@ export async function initializeDatabase() {
     CREATE TABLE IF NOT EXISTS items (
       id SERIAL PRIMARY KEY,
       name TEXT NOT NULL,
-      quantity INTEGER NOT NULL CHECK (quantity >= 0)
+      quantity INTEGER NOT NULL CHECK (quantity >= 0),
+      restock_quantity INTEGER NOT NULL CHECK (quantity >= 0)
+
     )
   `);
 
@@ -356,10 +358,10 @@ export async function initializeDatabase() {
   if (rows[0].count === 0) {
     await pool.query(
       `
-        INSERT INTO items (name, quantity)
-        VALUES ($1, $2), ($3, $4), ($5, $6)
+        INSERT INTO items (name, quantity, restock_quantity)
+        VALUES ($1, $2, $3), ($4, $5, $6), ($7, $8, $9)
       `,
-      ["Keyboard", 10, "Mouse", 5, "Monitor", 3]
+      ["Keyboard", 10, 5, "Mouse", 5, 10, "Monitor", 3, 4]
     );
   }
 }
